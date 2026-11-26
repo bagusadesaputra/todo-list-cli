@@ -14,8 +14,8 @@ function cetak_tabel_tugas(array $daftar_tugas): void
         return;
     }
 
-    $garis = "+-----+--------------------------------+-------------+---------------------+\n";
-    $header = sprintf("| %-3s | %-30s | %-11s | %-19s |\n", "ID", "Tugas", "Status", "Dibuat Pada");
+    $garis  = "+-----+--------------------------------+-------------+---------------------+---------------------+\n";
+    $header = sprintf("| %-3s | %-30s | %-11s | %-19s | %-19s |\n", "ID", "Tugas", "Status", "Dibuat Pada", "Diperbarui Pada");
 
     echo "\n=== DAFTAR TUGAS ===\n";
     echo $garis;
@@ -33,8 +33,16 @@ function cetak_tabel_tugas(array $daftar_tugas): void
 
         $status = $item['status'] ?? 'Todo';
         $created_at = $item['created_at'] ?? '-';
+        $updated_at = !empty($item['updated_at']) ? $item['updated_at'] : '-';
 
-        echo sprintf("| %-3s | %-30s | %-11s | %-19s |\n", $id, $nama_tugas, $status, $created_at);
+        echo sprintf(
+            "| %-3s | %-30s | %-11s | %-19s | %-19s |\n",
+            $id,
+            $nama_tugas,
+            $status,
+            $created_at,
+            $updated_at
+        );
     }
 
     echo $garis;

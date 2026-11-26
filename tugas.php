@@ -7,7 +7,12 @@ $tugas_path = __DIR__ . "/task.json";
 // Cek apakah ada argumen aksi yang diberikan
 if (!isset($argv[1])) {
     echo "Gunakan: php tugas.php [aksi] [parameter]\n";
-    echo "Contoh: php tugas.php tambah \"Beli susu\"\n";
+    echo "Contoh:\n";
+    echo "  php tugas.php tambah \"Beli susu\"\n";
+    echo "  php tugas.php daftar\n";
+    echo "  php tugas.php update 1 done\n";
+    echo "  php tugas.php edit 1 \"Beli susu segar\"\n";
+    echo "  php tugas.php hapus 1\n";
     exit(1);
 }
 
@@ -184,8 +189,56 @@ switch ($aksi) {
         echo "Status tugas [ID: {$id_update}] berhasil diubah menjadi: {$status_baru}\n";
         break;
 
+    case 'edit':
+        if (!isset($argv[2]) || !is_numeric($argv[2])) {
+            echo "ID tugas dibutuhkan dan harus berupa angka!\n";
+            echo "Contoh: php tugas.php edit 1 \"Beli susu segar\"\n";
+            exit(1);
+        }
+
+        if (!isset($argv[3]) || trim($argv[3]) === '') {
+            echo "Teks tugas baru dibutuhkan!\n";
+            exit(1);
+        }
+
+        $id_edit = (int)$argv[2];
+        $tugas_baru = trim($argv[3]);
+
+        $curr_tugas = [];
+        if (file_exists($tugas_path)) {
+            $tugas_file = file_get_contents($tugas_path);
+            $decoded = json_decode($tugas_file, true);
+            if (is_array($decoded)) {
+                $curr_tugas = $decoded;
+            }
+        }
+
+        $ditemukan = false;
+        foreach ($curr_tugas as &$item) {
+            if (isset($item['id']) && (int)$item['id'] === $id_edit) {
+                $item['tugas'] = $tugas_baru;
+                $item['updated_at'] = date('Y-m-d H:i:s');
+                $ditemukan = true;
+                break;
+            }
+        }
+        unset($item);
+
+        if (!$ditemukan) {
+            echo "Tugas dengan ID {$id_edit} tidak ditemukan!\n";
+            exit(1);
+        }
+
+        file_put_contents(
+            $tugas_path,
+            json_encode($curr_tugas, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        );
+
+        echo "Tugas [ID: {$id_edit}] berhasil diperbarui menjadi: \"{$tugas_baru}\"\n";
+        break;
+
     default:
         echo "Aksi tidak diketahui: '{$aksi}'\n";
-        echo "Aksi yang tersedia saat ini: tambah, daftar, hapus, update\n";
+        echo "Aksi yang tersedia saat ini: tambah, daftar, update, edit, hapus\n";
         exit(1);
 }
